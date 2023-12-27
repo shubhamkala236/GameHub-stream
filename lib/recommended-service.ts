@@ -45,42 +45,27 @@ export const getRecommended = async () => {
           },
         ],
       },
+      include:{
+        stream:{
+          select:{
+            isLive:true,
+          }
+        }
+      },
+      orderBy:{
+        createdAt:"desc",
+      }
     });
-
-    // users = await db.user.findMany({
-    //   where: {
-    //     NOT: {
-    //       id: userId,
-    //     },
-    //   },
-    // });
-
-    // await db.user.findMany({
-    //   where: {
-    //     NOT: {
-    //       followedBy: {
-    //         some: {
-    //           followerId: userId,
-    //         },
-    //       },
-    //     },
-    //   },
-    // });
-
-    // await db.user.findMany({
-    //   where: {
-    //     NOT: {
-    //       blocking: {
-    //         some: {
-    //           blockedId: userId,
-    //         },
-    //       },
-    //     },
-    //   },
-    // });
   } else {
     //for logged out user
     users = await db.user.findMany({
+      include:{
+        stream:{
+          select:{
+            isLive:true,
+          }
+        }
+      },
       orderBy: {
         createdAt: "desc",
       },
