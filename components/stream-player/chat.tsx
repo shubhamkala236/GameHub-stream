@@ -9,8 +9,10 @@ import {
 import { ConnectionState } from "livekit-client";
 import { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
-import { ChatHeader } from "./chat-header";
-import { ChatForm } from "./chat-form";
+import { ChatHEaderSkeleton, ChatHeader } from "./chat-header";
+import { ChatForm, ChatFormSkeleton } from "./chat-form";
+import { ChatList, ChatListSkeleton } from "./chat-list";
+import { ChatCommunity } from "./chat-community";
 
 interface ChatProps {
   hostName: string;
@@ -68,6 +70,10 @@ export const Chat = ({
       <ChatHeader/>
       {variant === ChatVariant.CHAT && (
         <>
+        <ChatList 
+          messages={reversedMessages}
+          isHidden={isHidden}
+        />
           <ChatForm
             onSubmit={onSubmit}
             value={value}
@@ -80,10 +86,22 @@ export const Chat = ({
         </>
       )}
       {variant === ChatVariant.COMMUNITY && (
-        <>
-          <p>Community</p>
-        </>
+        <ChatCommunity
+            viewerName={viewerName}
+            hostName={hostName}
+            isHidden={isHidden}
+        />
       )}
     </div>
   );
 };
+
+export const ChatSkeleton = () => {
+  return (
+    <div className="flex flex-col border-l border-b pt-0 h-[calc(100vh-80px)] border-2">
+      <ChatHEaderSkeleton/>
+      <ChatListSkeleton/>
+      <ChatFormSkeleton/>
+    </div>
+  )
+}
