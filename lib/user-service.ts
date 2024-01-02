@@ -1,25 +1,30 @@
-import { db } from "./db"
+import { db } from "./db";
 
-export const getUserByUsername = async(username:string)=>{
-    const user = await db.user.findFirst({
-        where:{
-            username,
+export const getUserByUsername = async (username: string) => {
+  const user = await db.user.findFirst({
+    where: {
+      username,
+    },
+    include: {
+      stream: true,
+      _count: {
+        select: {
+          followedBy: true,
         },
-        include:{
-            stream:true
-        }
-    })
+      },
+    },
+  });
 
-    return user;
-}
+  return user;
+};
 
-export const getUserById = async (id:string) => {
-    const user = await db.user.findUnique({
-        where:{id},
-        include:{
-            stream:true
-        }
-    })
+export const getUserById = async (id: string) => {
+  const user = await db.user.findUnique({
+    where: { id },
+    include: {
+      stream: true,
+    },
+  });
 
-    return user;
-}
+  return user;
+};
