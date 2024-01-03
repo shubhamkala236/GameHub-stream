@@ -1,7 +1,5 @@
 "use server";
 
-import { getSelf } from "@/lib/auth-service";
-import { db } from "@/lib/db";
 import {
   IngressAudioEncodingPreset,
   IngressInput,
@@ -12,12 +10,15 @@ import {
 } from "livekit-server-sdk";
 
 import { TrackSource } from "livekit-server-sdk/dist/proto/livekit_models";
+
+import { db } from "@/lib/db";
+import { getSelf } from "@/lib/auth-service";
 import { revalidatePath } from "next/cache";
 
 const roomService = new RoomServiceClient(
   process.env.LIVEKIT_API_URL!,
   process.env.LIVEKIT_API_KEY!,
-  process.env.LIVEKIT_API_SECRET!
+  process.env.LIVEKIT_API_SECRET!,
 );
 
 const ingressClient = new IngressClient(process.env.LIVEKIT_API_URL!);
@@ -43,7 +44,6 @@ export const resetIngresses = async (hostIdentity: string) => {
 export const createIngress = async (ingressType: IngressInput) => {
   const self = await getSelf();
 
-  //TODO RESET PREVIOUS INGRESS
   await resetIngresses(self.id);
 
   const options: CreateIngressOptions = {
@@ -62,20 +62,21 @@ export const createIngress = async (ingressType: IngressInput) => {
     };
     options.audio = {
       source: TrackSource.MICROPHONE,
-      preset: IngressAudioEncodingPreset.OPUS_STEREO_96KBPS,
+      preset: IngressAudioEncodingPreset.OPUS_STEREO_96KBPS
     };
-  }
+  };
 
-  const ingress = await ingressClient.createIngress(ingressType, options);
+  const ingress = await ingressClient.createIngress(
+    ingressType,
+    options,
+  );
 
   if (!ingress || !ingress.url || !ingress.streamKey) {
-    throw new Error("Failed to create Ingress");
+    throw new Error("Failed to create ingress");
   }
 
   await db.stream.update({
-    where: {
-      userId: self.id,
-    },
+    where: { userId: self.id },
     data: {
       ingressId: ingress.ingressId,
       serverUrl: ingress.url,
