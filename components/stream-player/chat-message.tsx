@@ -11,7 +11,7 @@ interface ChatMessageProps {
 export const ChatMessage = ({ data }: ChatMessageProps) => {
   const color = stringToColor(data.from?.name || "");
 
-  return (
+   return (
     <div className="flex gap-2 p-2 rounded-md hover:bg-white/5">
       <p className="text-sm text-white/40">
         {format(data.timestamp, "HH:MM")}
@@ -22,7 +22,9 @@ export const ChatMessage = ({ data }: ChatMessageProps) => {
             {data.from?.name}
           </span>:
         </p>
-        <p className="text-sm break-all">{data.message}</p>
+        <p className="text-sm break-all">
+          {data.message}
+        </p>
       </div>
     </div>
   );

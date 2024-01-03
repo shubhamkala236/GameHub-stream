@@ -2,6 +2,7 @@ import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import { resetIngresses } from "@/actions/ingress";
 
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
@@ -49,63 +50,57 @@ export async function POST(req: Request) {
     });
   }
 
+  // Get the type
+  const eventType = evt.type;
 
-   // Get the type
-   const eventType = evt.type;
-
-   if(eventType === "user.created")
-   {
+  if (eventType === "user.created") {
     console.log("USER CREATED CALLED");
-    
-     await db.user.create({
-        data: {
-            externalUserId: payload.data.id,
-            username:payload.data.username,
-            imageUrl:payload.data.image_url,
-            stream:{
-              create:{
-                name:`${payload.data.username}'s stream`
-              }
-            }
-        }
-     })
-   }
 
-   if(eventType === "user.updated")
-   {
+    await db.user.create({
+      data: {
+        externalUserId: payload.data.id,
+        username: payload.data.username,
+        imageUrl: payload.data.image_url,
+        stream: {
+          create: {
+            name: `${payload.data.username}'s stream`,
+          },
+        },
+      },
+    });
+  }
+
+  if (eventType === "user.updated") {
     console.log("USER UPDATED CALLED");
 
-     await db.user.update({
-        where:{
-            externalUserId:payload.data.id,
-        },
-        //updating in prisma/mongodb according to new clerk updated data
-        data: {
-            username:payload.data.username,
-            imageUrl:payload.data.image_url,
-        }
-     });
-   }
-  
-   if(eventType === "user.deleted")
-   {
+    await db.user.update({
+      where: {
+        externalUserId: payload.data.id,
+      },
+      //updating in prisma/mongodb according to new clerk updated data
+      data: {
+        username: payload.data.username,
+        imageUrl: payload.data.image_url,
+      },
+    });
+  }
+
+  if (eventType === "user.deleted") {
     console.log("USER DELETED CALLED");
     try {
+      await resetIngresses(payload.data.id);
       await db.user.delete({
-         where:{
-             externalUserId:payload.data.id,
-         }
-      })
-      
+        where: {
+          externalUserId: payload.data.id,
+        },
+      });
     } catch (error) {
       console.log(error);
     }
+  }
 
-   }
+  //    console.log(`Webhook with and ID of ${id} and type of ${eventType}`)
+  //    console.log('Webhook body:', body)
 
-//    console.log(`Webhook with and ID of ${id} and type of ${eventType}`)
-//    console.log('Webhook body:', body)
-  
-   return new Response('', { status: 200 })
-
+  return new Response("", { status: 200 });
 }
